@@ -22,8 +22,9 @@ done
 mkdir -p "$PIFORGE_ROOT/build" "$PIFORGE_ROOT/dist"
 exec 9> "$PIFORGE_ROOT/build/.lock"
 flock -n 9 || die "Another PiForge build is running"
-[[ -z $(git -C "$PIFORGE_ROOT" status --porcelain) ]] || die "Commit changes first: image provenance requires a clean checkout"
-PIFORGE_COMMIT=$(git -C "$PIFORGE_ROOT" rev-parse HEAD)
+checkout_status=$(git -c "safe.directory=$PIFORGE_ROOT" -C "$PIFORGE_ROOT" status --porcelain)
+[[ -z $checkout_status ]] || die "Commit changes first: image provenance requires a clean checkout"
+PIFORGE_COMMIT=$(git -c "safe.directory=$PIFORGE_ROOT" -C "$PIFORGE_ROOT" rev-parse HEAD)
 BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 export PIFORGE_COMMIT BUILD_DATE
 WORK=$(mktemp -d "$PIFORGE_ROOT/build/run.XXXXXX")

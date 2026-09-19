@@ -73,7 +73,7 @@ images are never uploaded by the success-only artifact step.
 
 Pinned Git objects are cached under `build/cache/git/` and exposed read-only
 to the guest. The host fetches only reviewed URLs/commits and runs no emulator
-build code. Cached commits are checked for object connectivity; checkout and
+build code. Cached repositories pass a full Git object integrity check; checkout and
 linkage checks still run on every image build. Submodules use the parent
 commit's recorded revisions. Delete a damaged source cache and rebuild rather
 than changing a lock to bypass an integrity failure.
@@ -91,8 +91,7 @@ On a native ARM64 Linux host, or an ARM64 Linux VM backing Docker:
 docker build -f configs/builder.Dockerfile -t piforge-builder:local .
 docker run --rm --privileged \
   --mount type=bind,src="$PWD",dst=/workspace \
-  piforge-builder:local bash -c \
-  'git config --global --add safe.directory /workspace; bash scripts/build-image.sh'
+  piforge-builder:local
 ```
 
 The privileged container needs loop devices and mount namespaces. It does not

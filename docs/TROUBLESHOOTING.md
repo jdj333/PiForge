@@ -4,7 +4,7 @@
 | --- | --- |
 | Host rejected | Run inside native aarch64 Linux, not the macOS shell or an x86 container. |
 | Loop/mount permission denied | Use a dedicated Linux host with root or a privileged container in a Linux VM; check `/dev/loop-control`. |
-| Git ownership error in a container | Mark only the mounted checkout as safe in that disposable container, as shown in BUILDING. |
+| Git ownership error in a container | The builder trusts only its exact checkout and pinned cache paths. Check the failing path and preserve logs; do not add a global safe-directory wildcard. |
 | Checksum mismatch | Stop. Remove only the corrupt cached download and retry the official URL; never bypass verification. |
 | APT 404 / missing package | Save logs and indexes. Bookworm repositories are moving; investigate official repository changes before updating pins or package names. |
 | Locked version unavailable / package drift | Do not drop the lock. Restore access to the exact version or deliberately bootstrap, review and commit a refreshed lock as described in BUILDING. |

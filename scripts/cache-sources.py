@@ -22,7 +22,7 @@ def cache_source(cache, source):
     subprocess.run(["git", "--git-dir", str(directory), "update-ref", "refs/heads/pinned",
                     source["commit"]], check=True)
     subprocess.run(["git", "--git-dir", str(directory), "symbolic-ref", "HEAD", "refs/heads/pinned"], check=True)
-    subprocess.run(["git", "--git-dir", str(directory), "fsck", "--connectivity-only", "--no-dangling"],
+    subprocess.run(["git", "--git-dir", str(directory), "fsck", "--full", "--no-dangling"],
                    check=True, stdout=subprocess.DEVNULL)
 
 
