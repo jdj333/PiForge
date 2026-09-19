@@ -18,4 +18,6 @@ jobs:
       - name: Lint, configuration, unit and static checks
         run: bash scripts/validate.sh
       - name: Disposable image mechanics
-        run: sudo bash tests/image-mechanics.sh
+        run: |
+          sudo bash tests/image-mechanics.sh
+          sudo bash tests/prepare-image.sh

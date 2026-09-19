@@ -98,6 +98,11 @@ remain separate tests. PiForge builds each from a locked source commit.
   selection, including `kernel_2712.img`; physical tests must cover the
   resulting page size and each core's dynamic recompiler. This difference
   is explicit and is not evidence that 16 KiB pages pass every emulator.
+* That image builder also sets initramfs-tools `MODULES=most` because a
+  chroot cannot discover its physical root device. PiForge's first real
+  package-install attempt reproduced `mkinitramfs: failed to determine
+  device for /`; the same documented configuration is applied before APT.
+  This is an image-build requirement, not an emulator compatibility patch.
 * No inspected requested module is known here to require a new PiForge
   compatibility patch. No new failures are claimed without build evidence.
   Source compilation is PiForge's pinning policy, not a claim that upstream

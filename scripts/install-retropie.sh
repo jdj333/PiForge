@@ -9,7 +9,11 @@ release = dict(line.split('=', 1) for line in Path('/etc/os-release').read_text(
 if release.get('VERSION_CODENAME', '').strip('"') != 'bookworm':
     raise SystemExit('Wrong OS release')
 PY
-apt-get update
+# initramfs-tools cannot discover a physical root device inside this chroot.
+# Upstream admin/image.sh also selects MODULES=most for image construction.
+mkdir -p /etc/initramfs-tools/conf.d
+printf 'MODULES=most\n' > /etc/initramfs-tools/conf.d/piforge
+apt-get -o APT::Update::Error-Mode=any update
 apt-get install -y --no-install-recommends \
     ca-certificates git curl sudo locales lsb-release gnupg build-essential pkg-config \
     python3 python3-sdl2 python3-pyudev python3-urwid python3-uinput \

@@ -5,7 +5,7 @@ source "$(dirname "$0")/common.sh"
 [[ $EUID -eq 0 ]] || die "Run with sudo on a dedicated build host"
 if [[ ${1:-} != --in-mount-namespace ]]; then
     [[ $# -eq 0 ]] || die "Usage: build-image.sh"
-    exec unshare --mount --propagation private "$0" --in-mount-namespace
+    exec unshare --mount --propagation private bash "$0" --in-mount-namespace
 fi
 [[ $# -eq 1 ]] || die "Unexpected arguments"
 for tool in curl xz sha256sum sfdisk losetup blkid e2fsck resize2fs tune2fs mount umount \
