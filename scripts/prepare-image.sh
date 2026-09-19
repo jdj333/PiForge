@@ -38,14 +38,15 @@ prepare_image() {
     mount --bind /sys "$ROOTFS/sys"; MOUNTS+=("$ROOTFS/sys")
     mount -o remount,bind,ro "$ROOTFS/sys"
     touch "$ROOTFS/run/piforge-build-guest"
+    mkdir -p "$ROOTFS/run/piforge-backup"
     mkdir -p "$ROOTFS/opt/piforge" "$ROOTFS/var/log/piforge"
     cp -a "$PIFORGE_ROOT/scripts" "$PIFORGE_ROOT/configs" "$ROOTFS/opt/piforge/"
-    cp -a "$ROOTFS/etc/resolv.conf" "$WORK/resolv.conf"
+    cp -a "$ROOTFS/etc/resolv.conf" "$ROOTFS/run/piforge-backup/resolv.conf"
     rm "$ROOTFS/etc/resolv.conf"
     cp -L /etc/resolv.conf "$ROOTFS/etc/resolv.conf"
     DNS_CHANGED=1
     if [[ -e $ROOTFS/usr/sbin/policy-rc.d ]]; then
-        cp -a "$ROOTFS/usr/sbin/policy-rc.d" "$WORK/policy-rc.d"
+        cp -a "$ROOTFS/usr/sbin/policy-rc.d" "$ROOTFS/run/piforge-backup/policy-rc.d"
     fi
     printf '#!/bin/sh\nexit 101\n' > "$ROOTFS/usr/sbin/policy-rc.d"
     chmod 755 "$ROOTFS/usr/sbin/policy-rc.d"

@@ -30,13 +30,15 @@ LOOP='' DNS_CHANGED=0 POLICY_CHANGED=0
 MOUNTS=()
 restore_guest() {
     if [[ $DNS_CHANGED == 1 ]]; then
-        rm -f "$ROOTFS/etc/resolv.conf"
-        cp -a "$WORK/resolv.conf" "$ROOTFS/etc/resolv.conf"
+        rm -f "$ROOTFS/etc/resolv.conf" || return 1
+        cp -a "$ROOTFS/run/piforge-backup/resolv.conf" "$ROOTFS/etc/resolv.conf" || return 1
         DNS_CHANGED=0
     fi
     if [[ $POLICY_CHANGED == 1 ]]; then
-        rm -f "$ROOTFS/usr/sbin/policy-rc.d"
-        if [[ -e $WORK/policy-rc.d ]]; then cp -a "$WORK/policy-rc.d" "$ROOTFS/usr/sbin/policy-rc.d"; fi
+        rm -f "$ROOTFS/usr/sbin/policy-rc.d" || return 1
+        if [[ -e $ROOTFS/run/piforge-backup/policy-rc.d ]]; then
+            cp -a "$ROOTFS/run/piforge-backup/policy-rc.d" "$ROOTFS/usr/sbin/policy-rc.d" || return 1
+        fi
         POLICY_CHANGED=0
     fi
 }
@@ -52,7 +54,10 @@ cleanup() {
     local status=$?
     trap - EXIT INT TERM
     set +e
-    if [[ -d $ROOTFS/var/log/piforge ]]; then cp -a "$ROOTFS/var/log/piforge" "$ARTIFACT_DIR/guest-logs"; fi
+    if [[ -d $ROOTFS/var/log/piforge ]]; then
+        mkdir -p "$ARTIFACT_DIR/guest-logs"
+        cp -R --no-preserve=ownership "$ROOTFS/var/log/piforge/." "$ARTIFACT_DIR/guest-logs/" || status=1
+    fi
     if ! restore_guest; then status=1; log "Failed to restore guest temporary configuration"; fi
     if ! unmount_image; then
         status=1
@@ -81,7 +86,8 @@ guest configure-pi5.sh
 guest run-smoke-tests.sh
 guest finalize-image.sh
 cp "$ROOTFS/etc/piforge-build-info.json" "$ARTIFACT_DIR/$OUTPUT_IMAGE_NAME.build-info.json"
-cp -a "$ROOTFS/var/log/piforge" "$ARTIFACT_DIR/guest-logs"
+mkdir -p "$ARTIFACT_DIR/guest-logs"
+cp -R --no-preserve=ownership "$ROOTFS/var/log/piforge/." "$ARTIFACT_DIR/guest-logs/"
 restore_guest
 sync
 unmount_image

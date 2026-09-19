@@ -4,7 +4,9 @@
 
 Start from the official checksum-pinned Raspberry Pi OS Lite ARM64 Bookworm
 disk image, preserving its partition UUIDs, boot firmware, and first-boot
-provisioning. Use a native ARM64 Linux host and a chroot for the smallest
+filesystem expansion. Replace the base's account-renaming dialog with a
+local password prompt for the fixed RetroPie owner `pi`. Use a native ARM64
+Linux host and a chroot for the smallest
 initial execution path. GitHub's ARM64 Ubuntu runner can build without CPU
 emulation; macOS users need an ARM64 Linux VM. QEMU is not required for this
 milestone and is not hardware validation.

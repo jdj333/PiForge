@@ -21,7 +21,7 @@ if [[ $VULKAN_DIAGNOSTICS == 1 ]]; then
 fi
 if ! id pi >/dev/null 2>&1; then useradd --create-home --shell /bin/bash pi; fi
 usermod -L pi
-for group in audio video input render; do
+for group in audio video input render sudo; do
     getent group "$group" >/dev/null || groupadd --system "$group"
     usermod -a -G "$group" pi
 done

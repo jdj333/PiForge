@@ -93,6 +93,11 @@ remain separate tests. PiForge builds each from a locked source commit.
   defaults until hardware measurements justify changing them.
 * EmulationStation's crash message still recommends `gpu_split`; that
   legacy diagnostic is not guidance for configuring Pi 5 KMS.
+* Upstream's general `admin/image.sh` currently forces `kernel8.img` for
+  64-bit builds (4 KiB pages). PiForge preserves the official Pi 5 kernel
+  selection, including `kernel_2712.img`; physical tests must cover the
+  resulting page size and each core's dynamic recompiler. This difference
+  is explicit and is not evidence that 16 KiB pages pass every emulator.
 * No inspected requested module is known here to require a new PiForge
   compatibility patch. No new failures are claimed without build evidence.
   Source compilation is PiForge's pinning policy, not a claim that upstream
