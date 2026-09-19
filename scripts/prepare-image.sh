@@ -41,6 +41,10 @@ prepare_image() {
     mkdir -p "$ROOTFS/run/piforge-backup"
     mkdir -p "$ROOTFS/opt/piforge" "$ROOTFS/var/log/piforge"
     cp -a "$PIFORGE_ROOT/scripts" "$PIFORGE_ROOT/configs" "$ROOTFS/opt/piforge/"
+    mkdir -p "$ROOTFS/var/cache/piforge-git"
+    mount --bind "$PIFORGE_ROOT/build/cache/git" "$ROOTFS/var/cache/piforge-git"
+    MOUNTS+=("$ROOTFS/var/cache/piforge-git")
+    mount -o remount,bind,ro "$ROOTFS/var/cache/piforge-git"
     cp -a "$ROOTFS/etc/resolv.conf" "$ROOTFS/run/piforge-backup/resolv.conf"
     rm "$ROOTFS/etc/resolv.conf"
     cp -L /etc/resolv.conf "$ROOTFS/etc/resolv.conf"

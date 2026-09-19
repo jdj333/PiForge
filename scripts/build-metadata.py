@@ -15,6 +15,8 @@ def sha256(path):
 
 
 config, lock = load()
+package_lock_path = Path(__file__).resolve().parents[1] / "configs/packages.lock.json"
+packages_locked = os.environ.get("PIFORGE_PACKAGE_BOOTSTRAP", "0") != "1"
 packages = subprocess.check_output(
     ["dpkg-query", "-W", "-f=${binary:Package}\t${Version}\t${Architecture}\t${db:Status-Status}\n"],
     text=True,
@@ -42,12 +44,14 @@ metadata = {
     "emulators": emulators,
     "emulationstation": lock["sources"]["emulationstation"],
     "source_lock": lock,
+    "package_lock": json.loads(package_lock_path.read_text()) if packages_locked else None,
     "resolved_sources": source_records,
     "build_configuration": config,
     "apt_sources": {str(path): path.read_text() for path in Path("/etc/apt").rglob("*")
                     if path.is_file() and path.suffix in {".list", ".sources"}},
     "validation": {"build_time": "passed", "physical_pi5": "not_run"},
-    "reproducibility": {"base_and_git_sources_pinned": True, "apt_snapshot_pinned": False,
+    "reproducibility": {"base_and_git_sources_pinned": True, "package_versions_locked": packages_locked,
+                        "apt_snapshot_pinned": False,
                         "bit_identical": False},
 }
 Path("/etc/piforge-build-info.json").write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n")

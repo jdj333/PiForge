@@ -1,6 +1,5 @@
 import copy
 import importlib.util
-import json
 from pathlib import Path
 import struct
 import sys
@@ -12,6 +11,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from config import load, validate
 from boot_config import validate_boot
 from smoke import check_content, check_elf, check_component
+from packages import compare_packages, validate_lock, input_digest
 
 spec = importlib.util.spec_from_file_location("layout", ROOT / "scripts/image-layout.py")
 layout = importlib.util.module_from_spec(spec)
@@ -58,6 +58,29 @@ class ConfigurationTests(unittest.TestCase):
                        {"emulators": ["retroarch", "lr-mgba", "lr-mgba"]}):
             with self.subTest(change=change), self.assertRaises(ValueError):
                 validate({**self.config, **change}, self.lock)
+
+
+class PackageLockTests(unittest.TestCase):
+    def test_accept_matching_inventory(self):
+        compare_packages({"libsdl2-2.0-0:arm64": "2.26.5+dfsg-1"},
+                         {"libsdl2-2.0-0:arm64": "2.26.5+dfsg-1"})
+
+    def test_reject_added_removed_and_changed_packages(self):
+        for actual in ({}, {"a": "2"}, {"a": "1", "b": "1"}):
+            with self.subTest(actual=actual), self.assertRaises(ValueError):
+                compare_packages({"a": "1"}, actual)
+
+    def test_lock_is_tied_to_recipe_inputs(self):
+        lock = {"schema_version": 1, "inputs_sha256": input_digest(), "packages": {"libc6:arm64": "2.36-1"}}
+        validate_lock(lock)
+        lock["inputs_sha256"] = "0" * 64
+        with self.assertRaises(ValueError):
+            validate_lock(lock)
+
+    def test_reject_malformed_package_arguments(self):
+        for package in ("--allow-unauthenticated", "foo=bar", "x;command", "libc6:amd64"):
+            with self.subTest(package=package), self.assertRaises(ValueError):
+                validate_lock({"schema_version": 1, "inputs_sha256": input_digest(), "packages": {package: "1"}})
 
 
 class LayoutTests(unittest.TestCase):

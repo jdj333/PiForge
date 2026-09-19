@@ -2,7 +2,6 @@
 """Build-time checks: no GPU, display, ROM, or physical Pi is assumed."""
 import argparse
 import ctypes
-import hashlib
 import json
 import os
 from pathlib import Path
@@ -12,6 +11,7 @@ import xml.etree.ElementTree as ET
 
 from boot_config import validate_boot
 from config import CORES, load, require
+from packages import compare_packages, installed_packages, validate_lock
 
 
 def check_elf(path):
@@ -79,6 +79,10 @@ def main():
     if args.component:
         check_component(args.component)
         return
+    if os.environ.get("PIFORGE_PACKAGE_BOOTSTRAP", "0") != "1":
+        package_lock = json.loads((Path(__file__).resolve().parents[1] / "configs/packages.lock.json").read_text())
+        validate_lock(package_lock)
+        compare_packages(package_lock["packages"], installed_packages())
     release = dict(line.split("=", 1) for line in Path("/etc/os-release").read_text().splitlines() if "=" in line)
     require(release["VERSION_CODENAME"].strip('"') == config["os_release"], "Wrong OS release")
     require(Path("/etc/rpi-issue").is_file(), "Not Raspberry Pi OS")
@@ -91,6 +95,7 @@ def main():
         package_installed(package)
     for library in ("libEGL.so.1", "libGLESv2.so.2", "libGL.so.1", "libgbm.so.1", "libdrm.so.2"):
         ctypes.CDLL(library)
+    require(Path("/usr/lib/aarch64-linux-gnu/dri/v3d_dri.so").is_file(), "Missing Mesa V3D DRI driver")
     sdl = ctypes.CDLL("libSDL2-2.0.so.0")
     sdl.SDL_GetVideoDriver.restype = ctypes.c_char_p
     drivers = [sdl.SDL_GetVideoDriver(i).decode() for i in range(sdl.SDL_GetNumVideoDrivers())]
@@ -113,6 +118,11 @@ def main():
     check_content(Path("/"), palette)
     require(Path("/etc/systemd/system/multi-user.target.wants/piforge-firstboot.service").is_symlink(),
             "Missing first-boot account provisioning")
+    shadow = {line.split(":", 2)[0]: line.split(":", 2)[1]
+              for line in Path("/etc/shadow").read_text().splitlines()}
+    require(shadow.get("pi") == "!", "The pi account must have no preset password hash")
+    require(not Path("/etc/systemd/system/multi-user.target.wants/userconfig.service").exists(),
+            "Conflicting base account-renaming service is still enabled")
     print("PASS build-time image checks (hardware graphics/boot NOT tested)")
 
 

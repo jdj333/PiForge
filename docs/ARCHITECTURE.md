@@ -36,7 +36,8 @@ unmounting. Upload logs on failures; publish image artifacts only on success.
 
 ## Boundaries
 
-* Configuration: `configs/build.json` and `configs/sources.lock.json`.
+* Configuration: `configs/build.json`, `configs/sources.lock.json`, and
+  `configs/packages.lock.json`.
 * Orchestration: `scripts/build-image.sh`, with phase scripts under `scripts/`.
 * Generated work: ignored `build/`; distributable artifacts: ignored `dist/`.
 * Validation: unprivileged unit/static tests plus privileged Linux image
@@ -49,10 +50,16 @@ unmounting. Upload logs on failures; publish image artifacts only on success.
 
 ## Reproducibility contract
 
-The base image and Git sources are immutable inputs. APT authenticates
-packages against distribution repositories, and metadata records exact
-installed versions. Those repositories are not an immutable snapshot; build
-timestamps, filesystem identifiers/content ordering, and compiler behavior
-also prevent a bit-identical guarantee. A stable release milestone needs a
-successful full image build, package snapshot strategy, and hardware evidence.
+The base image, Git revisions, and package versions are locked. APT authenticates
+packages against distribution repositories. The build installs the exact locked
+versions, applies temporary version preferences during compilation, and rejects
+added, removed, or changed packages at smoke-test time. Normal installed-system
+updates are not held back by these build-only preferences.
+
+Those repositories are not an immutable archive: if a version disappears, the
+build fails. Build timestamps, filesystem identifiers/content ordering, and
+compiler behavior also prevent a bit-identical guarantee. A stable release
+milestone needs a successful full image build, a package archival strategy, and
+hardware evidence. Package-lock refreshes are explicit bootstrap builds,
+marked as such in metadata, followed by review and a normal locked rebuild.
 Local lint/unit success alone must not be presented as that milestone.

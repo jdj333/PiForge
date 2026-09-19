@@ -112,7 +112,8 @@ remain separate tests. PiForge builds each from a locked source commit.
 
 Pinning RetroPie-Setup alone does not pin its child repositories, optional
 assets, or APT packages. PiForge additionally locks downloaded Git sources
-and records installed package versions. Distribution APT repositories still
-move; until an immutable package archive is maintained, this is a traceable
-repeatable recipe, not bit-for-bit image reproducibility. No QEMU or chroot
+and the complete installed package inventory. Distribution APT repositories
+still move; a removed version stops the build, and durable historical rebuilds
+need an immutable package archive. This is not a bit-for-bit image
+reproducibility claim. No QEMU or chroot
 test establishes physical Pi 5 boot, GPU, audio, or controller compatibility.

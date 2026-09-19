@@ -4,7 +4,12 @@ source "$(dirname "$0")/common.sh"
 guest_only
 log "Record build provenance and clean temporary files"
 python3 "$PIFORGE_ROOT/scripts/build-metadata.py"
+# Upstream starts a key agent even for source installs. Stop only agents in
+# this guest before removing their sockets, so they cannot keep root mounted.
+gpgconf --kill all
 apt-get clean
+rm -f /etc/apt/preferences.d/piforge
+rm -f /root/.gitconfig
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /root/.cache /root/.gnupg
 rm -rf /opt/RetroPie-Setup/tmp
 rm -f /opt/RetroPie-Setup/piforge_packages.sh

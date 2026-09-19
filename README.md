@@ -19,8 +19,10 @@ checked separately. Output includes `.img.xz`, SHA256 checksums, JSON provenance
 **Status:** initial implementation; a successful GitHub Actions image build
 and physical Pi 5 validation are still required. Source inspection, static
 tests, and Linux filesystem tests are not proof of hardware compatibility.
-The base and Git inputs are pinned, but moving distribution APT repositories
-mean builds are not yet bit-for-bit reproducible.
+The base, Git sources and distribution package versions are locked. A build
+fails if those package versions are unavailable or its package inventory
+drifts. Timestamps and filesystem layout still prevent a bit-for-bit guarantee;
+long-term rebuilds also need an immutable package archive.
 
 ## Build
 
@@ -48,6 +50,8 @@ Extract the artifact archive and run `sha256sum --check *.sha256` from the
 directory containing the image and metadata. On macOS, use
 `shasum -a 256 -c NAME.sha256`. Open Raspberry Pi Imager, choose **Use custom**,
 select the `.img.xz`, and carefully select the intended microSD/USB device.
+Skip Imager account customizations: this initial image uses the fixed `pi`
+account and its own local password prompt.
 Flashing erases that selected device. The image builder itself never flashes.
 
 Connect a keyboard and display to the Pi 5. The first local boot prompts for

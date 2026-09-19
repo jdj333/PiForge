@@ -8,6 +8,13 @@ if [[ ${1:-} != --in-mount-namespace ]]; then
     exec unshare --mount --propagation private bash "$0" --in-mount-namespace
 fi
 [[ $# -eq 1 ]] || die "Unexpected arguments"
+PIFORGE_PACKAGE_BOOTSTRAP=${PIFORGE_PACKAGE_BOOTSTRAP:-0}
+[[ $PIFORGE_PACKAGE_BOOTSTRAP =~ ^[01]$ ]] || die "Invalid package bootstrap flag"
+if [[ $PIFORGE_PACKAGE_BOOTSTRAP == 0 ]]; then
+    python3 "$PIFORGE_ROOT/scripts/packages.py" validate
+else
+    log "Package bootstrap: this attempt does not enforce an existing package lock"
+fi
 for tool in curl xz sha256sum sfdisk losetup blkid e2fsck resize2fs tune2fs mount umount \
     chroot truncate python3 git flock findmnt; do
     command -v "$tool" >/dev/null || die "Missing host tool: $tool"
@@ -54,6 +61,10 @@ cleanup() {
     local status=$?
     trap - EXIT INT TERM
     set +e
+    if [[ -x $ROOTFS/usr/bin/gpgconf && -d $ROOTFS/root/.gnupg ]]; then
+        chroot "$ROOTFS" /usr/bin/env -i PATH=/usr/bin:/bin HOME=/root \
+            GNUPGHOME=/root/.gnupg /usr/bin/gpgconf --kill all || status=1
+    fi
     if [[ -d $ROOTFS/var/log/piforge ]]; then
         mkdir -p "$ARTIFACT_DIR/guest-logs"
         cp -R --no-preserve=ownership "$ROOTFS/var/log/piforge/." "$ARTIFACT_DIR/guest-logs/" || status=1
@@ -71,6 +82,8 @@ trap 'exit 130' INT
 trap 'exit 143' TERM
 trap 'printf "[PiForge] Failed at line %s: %s\n" "$LINENO" "$BASH_COMMAND" >&2' ERR
 bash "$PIFORGE_ROOT/scripts/download-base-image.sh" "$PIFORGE_ROOT/build/cache"
+log "Cache pinned Git sources"
+python3 "$PIFORGE_ROOT/scripts/cache-sources.py" "$PIFORGE_ROOT/build/cache/git"
 xz --decompress --stdout "$PIFORGE_ROOT/build/cache/$BASE_IMAGE_SHA256.img.xz" > "$IMAGE"
 source "$PIFORGE_ROOT/scripts/prepare-image.sh"
 prepare_image
@@ -78,6 +91,7 @@ guest() {
     chroot "$ROOTFS" /usr/bin/env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
         HOME=/root TERM=linux LC_ALL=C.UTF-8 DEBIAN_FRONTEND=noninteractive \
         PIFORGE_COMMIT="$PIFORGE_COMMIT" BUILD_DATE="$BUILD_DATE" \
+        PIFORGE_PACKAGE_BOOTSTRAP="$PIFORGE_PACKAGE_BOOTSTRAP" \
         /bin/bash "/opt/piforge/scripts/$1"
 }
 guest install-retropie.sh

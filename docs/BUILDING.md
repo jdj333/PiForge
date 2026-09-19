@@ -29,10 +29,32 @@ re-review this boundary when updating RetroPie. PiForge does not claim that a
 source lock is a security audit of every transitive source line.
 
 Distribution packages use the official authenticated APT repositories from
-the base image. Installed versions and source configuration are recorded, but
-there is no APT snapshot lock. To achieve stronger historical reproducibility,
-add an immutable archive for both Debian and Raspberry Pi packages, test package
-replay, and record its identity before describing builds as fully reproducible.
+the base image. `configs/packages.lock.json` locks the complete installed package
+inventory and is tied to the base/source/emulator configuration. Exact versions
+are installed before building, temporary APT preferences prevent drift, and the
+final smoke test compares the entire inventory. Missing versions fail rather
+than silently upgrading. Preferences are removed from the finished image so
+normal security updates remain possible after deployment.
+
+For durable historical rebuilds, an immutable archive of both Debian and
+Raspberry Pi packages is still needed. Version locks guarantee input selection
+when packages are available; they do not guarantee future repository retention
+or byte-identical disk images.
+
+To deliberately refresh the package lock after reviewing new inputs, commit
+the configuration and run a local bootstrap build:
+
+```bash
+sudo env PIFORGE_PACKAGE_BOOTSTRAP=1 bash scripts/build-image.sh
+python3 scripts/packages.py from-metadata dist/BUILD/IMAGE.build-info.json
+bash scripts/validate.sh
+# Review/commit the generated lock, then run a normal locked build.
+```
+
+The bootstrap flag is passed explicitly into the guest and recorded in metadata
+as `package_versions_locked: false`. It is not exposed by the image workflow.
+Only metadata reporting successful build-time checks with matching source
+configuration can generate the lock. A bootstrap is not a release candidate.
 
 ## Run
 
@@ -48,6 +70,13 @@ It serializes builds within the checkout using `flock`. Work lives in
 Each attempt has a unique directory under `dist/` containing its logs. Success
 adds the compressed image, metadata JSON, and checksum file. Failed/partial
 images are never uploaded by the success-only artifact step.
+
+Pinned Git objects are cached under `build/cache/git/` and exposed read-only
+to the guest. The host fetches only reviewed URLs/commits and runs no emulator
+build code. Cached commits are checked for object connectivity; checkout and
+linkage checks still run on every image build. Submodules use the parent
+commit's recorded revisions. Delete a damaged source cache and rebuild rather
+than changing a lock to bypass an integrity failure.
 
 The `install-*`, `configure-pi5`, smoke and finalize scripts require a marker
 inside the private guest `/run`; do not execute them against the host. Do not

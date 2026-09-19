@@ -14,6 +14,12 @@ PY
 mkdir -p /etc/initramfs-tools/conf.d
 printf 'MODULES=most\n' > /etc/initramfs-tools/conf.d/piforge
 apt-get -o APT::Update::Error-Mode=any update
+if [[ ${PIFORGE_PACKAGE_BOOTSTRAP:-0} == 0 ]]; then
+    python3 "$PIFORGE_ROOT/scripts/packages.py" preferences > /etc/apt/preferences.d/piforge
+    package_arguments=$(python3 "$PIFORGE_ROOT/scripts/packages.py" arguments)
+    mapfile -t locked_packages <<< "$package_arguments"
+    apt-get install -y --no-install-recommends --allow-downgrades "${locked_packages[@]}"
+fi
 apt-get install -y --no-install-recommends \
     ca-certificates git curl sudo locales lsb-release gnupg build-essential pkg-config \
     python3 python3-sdl2 python3-pyudev python3-urwid python3-uinput \
@@ -24,7 +30,7 @@ if [[ $VULKAN_DIAGNOSTICS == 1 ]]; then
     apt-get install -y --no-install-recommends libvulkan1 mesa-vulkan-drivers vulkan-tools
 fi
 if ! id pi >/dev/null 2>&1; then useradd --create-home --shell /bin/bash pi; fi
-usermod -L pi
+usermod --password '!' pi
 for group in audio video input render sudo; do
     getent group "$group" >/dev/null || groupadd --system "$group"
     usermod -a -G "$group" pi
@@ -34,7 +40,9 @@ printf 'own_sdl2 = "0"\n' > /opt/retropie/configs/all/retropie.cfg
 chown -R pi:pi /opt/retropie/configs /home/pi/RetroPie
 git init /opt/RetroPie-Setup
 git -C /opt/RetroPie-Setup remote add origin "$RETROPIE_REPOSITORY"
-git -C /opt/RetroPie-Setup fetch --depth=1 origin "$RETROPIE_COMMIT"
+git config --global --add safe.directory "/var/cache/piforge-git/$RETROPIE_COMMIT.git"
+git -C /opt/RetroPie-Setup -c protocol.file.allow=always fetch --depth=1 --update-shallow \
+    "/var/cache/piforge-git/$RETROPIE_COMMIT.git" "$RETROPIE_COMMIT"
 git -C /opt/RetroPie-Setup checkout --detach "$RETROPIE_COMMIT"
 [[ $(git -C /opt/RetroPie-Setup rev-parse HEAD) == "$RETROPIE_COMMIT" ]] || die "RetroPie commit mismatch"
 python3 - <<'PY'

@@ -7,6 +7,7 @@
 | Git ownership error in a container | Mark only the mounted checkout as safe in that disposable container, as shown in BUILDING. |
 | Checksum mismatch | Stop. Remove only the corrupt cached download and retry the official URL; never bypass verification. |
 | APT 404 / missing package | Save logs and indexes. Bookworm repositories are moving; investigate official repository changes before updating pins or package names. |
+| Locked version unavailable / package drift | Do not drop the lock. Restore access to the exact version or deliberately bootstrap, review and commit a refreshed lock as described in BUILDING. |
 | Unpinned Git repository | Review the upstream recipe and source license/origin, add an immutable lock, run tests and commit. Never fall back to master. |
 | Source compilation fails | Read the per-module log under `dist/*/guest-logs/`; retain the work image. Do not silently skip the emulator or switch architectures. |
 | Process killed / out of space | Increase host RAM/disk or lower `build_jobs`. Workspace needs at least 30 GiB available. Guest swap is deliberately disabled. |

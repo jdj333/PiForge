@@ -35,6 +35,7 @@ chmod 751 "$ROOTFS/usr/sbin/policy-rc.d"
 umount "$ROOTFS"; MOUNTS=()
 losetup -d "$LOOP"; LOOP=''
 export IMAGE_SIZE_GIB=1
+mkdir -p "$PIFORGE_ROOT/build/cache/git"
 source "$PIFORGE_ROOT/scripts/prepare-image.sh"
 prepare_image
 [[ $DNS_CHANGED == 1 && $POLICY_CHANGED == 1 ]] || die "Missing preparation state"
@@ -43,6 +44,7 @@ prepare_image
 [[ -f $ROOTFS/run/piforge-build-guest ]] || die "Guest marker missing"
 [[ ! -e $ROOTFS/dev/loop-control ]] || die "Host disk control exposed in guest"
 [[ ! -S $ROOTFS/run/systemd/private ]] || die "Host service socket exposed in guest"
+[[ $(findmnt -n -o OPTIONS --target "$ROOTFS/var/cache/piforge-git") == *ro* ]] || die "Source cache is writable in guest"
 mountpoint -q "$ROOTFS/boot/firmware"
 [[ $(findmnt -n -o OPTIONS --target "$ROOTFS/sys") == *ro* ]] || die "Guest sysfs is writable"
 log "PASS real image expansion, mounts, isolated run/dev, read-only sysfs and configuration backup"
