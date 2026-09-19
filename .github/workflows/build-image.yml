@@ -1,0 +1,46 @@
+name: Build experimental Pi 5 image
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: piforge-image-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  image:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Install Linux host tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl xz-utils fdisk e2fsprogs dosfstools util-linux python3 git shellcheck
+      - name: Validate
+        run: bash scripts/validate.sh
+      - name: Build complete image
+        run: sudo bash scripts/build-image.sh
+      - name: Upload image, checksums and metadata
+        if: success()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: piforge-image-${{ github.run_id }}
+          path: |
+            dist/**/*.img.xz
+            dist/**/*.sha256
+            dist/**/*.build-info.json
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+      - name: Upload build logs even on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: piforge-logs-${{ github.run_id }}
+          path: |
+            dist/**/*.log
+            dist/**/guest-logs/**
+          if-no-files-found: warn
+          retention-days: 14

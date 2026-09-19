@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# shellcheck source=scripts/common.sh
+source "$(dirname "$0")/common.sh"
+guest_only
+log "Validate Pi 5 full KMS and configure first login"
+# Keep the official image's graphics settings; reject unsupported changes.
+python3 - <<'PY'
+import sys
+from pathlib import Path
+sys.path.insert(0, '/opt/piforge/scripts')
+from boot_config import validate_boot
+validate_boot(Path('/boot/firmware'))
+PY
+# RGUI needs no artwork pack beyond the pinned upstream UI resources.
+printf '\nmenu_driver = "rgui"\nvideo_driver = "gl"\n' >> /opt/retropie/configs/all/retroarch.cfg
+chown pi:pi /opt/retropie/configs/all/retroarch.cfg
+install -m 755 "$PIFORGE_ROOT/scripts/firstboot.sh" /usr/local/sbin/piforge-firstboot
+install -m 644 "$PIFORGE_ROOT/configs/piforge-firstboot.service" /etc/systemd/system/piforge-firstboot.service
+systemctl enable piforge-firstboot.service
+printf '\nPiForge: log in as pi, then run emulationstation on the local console.\n' >> /etc/issue

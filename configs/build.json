@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "build_version": "0.1.0-dev",
+  "os_release": "bookworm",
+  "base_image_version": "2026-04-13",
+  "base_image_url": "https://downloads.raspberrypi.com/raspios_oldstable_lite_arm64/images/raspios_oldstable_lite_arm64-2026-04-14/2026-04-13-raspios-bookworm-arm64-lite.img.xz",
+  "base_image_sha256": "9bba9c625dd4dd4e1b326dd2551e37a2029db9090bf19ea300649b78c054de6f",
+  "retropie_repository": "https://github.com/RetroPie/RetroPie-Setup.git",
+  "retropie_commit": "664d2537d310edea267994097f800f82387f1a5d",
+  "emulators": ["retroarch", "lr-snes9x", "lr-genesis-plus-gx", "lr-gambatte", "lr-fceumm", "lr-mgba", "lr-pcsx-rearmed", "lr-mupen64plus-next"],
+  "output_image_name": "piforge-pi5-bookworm-arm64",
+  "image_size_gib": 20,
+  "shrink_headroom_mib": 512,
+  "build_jobs": 2,
+  "vulkan_diagnostics": true
+}

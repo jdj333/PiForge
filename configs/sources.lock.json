@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "sources": {
+    "retroarch": {
+      "url": "https://github.com/retropie/RetroArch.git",
+      "branch": "retropie-v1.19.0",
+      "commit": "0832a8d18b90ebdfd3948748d5615a74b667828b"
+    },
+    "emulationstation": {
+      "url": "https://github.com/RetroPie/EmulationStation.git",
+      "branch": "stable",
+      "commit": "c552292ff42230ed5947b651ad1b6d5c8122a452"
+    },
+    "lr-snes9x": {
+      "url": "https://github.com/libretro/snes9x.git",
+      "branch": "master",
+      "commit": "890b5d445538fe790aa3add3d5702c80f551e0ae"
+    },
+    "lr-genesis-plus-gx": {
+      "url": "https://github.com/libretro/Genesis-Plus-GX.git",
+      "branch": "master",
+      "commit": "c2838c7dc4236fc2fe94e5dbd08b41486067918e"
+    },
+    "lr-gambatte": {
+      "url": "https://github.com/libretro/gambatte-libretro.git",
+      "branch": "master",
+      "commit": "d9d6cd06382d1ced30de34d56d3609452323dab1"
+    },
+    "lr-fceumm": {
+      "url": "https://github.com/libretro/libretro-fceumm.git",
+      "branch": "master",
+      "commit": "236ccdfc911e84c60fea6b9d0699c2d440a8de14"
+    },
+    "lr-mgba": {
+      "url": "https://github.com/libretro/mgba.git",
+      "branch": "master",
+      "commit": "7a12d6d4b9acb14c0ae62c9166b6a2f3d08007f6"
+    },
+    "lr-pcsx-rearmed": {
+      "url": "https://github.com/libretro/pcsx_rearmed.git",
+      "branch": "master",
+      "commit": "8625c395a24411f8c77e69802b516df9c613a712"
+    },
+    "lr-mupen64plus-next": {
+      "url": "https://github.com/libretro/mupen64plus-libretro-nx.git",
+      "branch": "develop",
+      "commit": "6752836de8b224febfd5708444755b77712ac939"
+    },
+    "kmsxx": {
+      "url": "https://github.com/cmitu/kmsxx.git",
+      "branch": "retropie",
+      "commit": "4ff33a88cbb503cca80087fe934de17861d4b92a"
+    },
+    "common-shaders": {
+      "url": "https://github.com/RetroPie/common-shaders.git",
+      "branch": "rpi",
+      "commit": "43eaf9b91857eb8515310c74ae750895d77b20f8"
+    },
+    "core-info": {
+      "url": "https://github.com/libretro/libretro-core-info.git",
+      "branch": "master",
+      "commit": "5a74858ab2f7a50cebb5a6330895bc38899531c0"
+    },
+    "joypad-autoconfig": {
+      "url": "https://github.com/libretro/retroarch-joypad-autoconfig.git",
+      "branch": "master",
+      "commit": "4593768ad2fde42a71e048b377ca6351dc1075ff"
+    },
+    "retroarch-assets": {
+      "url": "https://github.com/libretro/retroarch-assets.git",
+      "branch": "master",
+      "commit": "73106363e14e34c08a5854b4cfbc29f184e3b783"
+    },
+    "es-theme-carbon": {
+      "url": "https://github.com/RetroPie/es-theme-carbon.git",
+      "branch": "master",
+      "commit": "b09973e0b0c589cb11fe772c169a6ff5d588b390"
+    },
+    "es-theme-carbon-2021": {
+      "url": "https://github.com/RetroPie/es-theme-carbon-2021.git",
+      "branch": "master",
+      "commit": "15eb13ea28267148c8f8f5f5b15a80b23be29e5a"
+    }
+  }
+}
