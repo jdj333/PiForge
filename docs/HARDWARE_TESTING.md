@@ -20,6 +20,8 @@ SHA256 before writing. Record results separately from build-time metadata.
 2. Record `uname -a`, `dpkg --print-architecture`, `/etc/os-release`,
    `/proc/device-tree/model`, `lsblk -f`, and `df -h /`. Expect ARM64 Bookworm,
    BCM2712 Pi 5 and a Pi 5 kernel. Check `journalctl -b -p warning` for errors.
+   Record `getconf PAGE_SIZE`; test the dynarec cores with the stock Pi 5
+   kernel's page size rather than assuming a 4 KiB kernel.
 3. Check `lsmod` for vc4/v3d and `/dev/dri` for card/render nodes. Run
    `/opt/retropie/supplementary/kmsxx/kmsprint`; record connected connectors
    and modes. Do not assume the display card is always `card0`.

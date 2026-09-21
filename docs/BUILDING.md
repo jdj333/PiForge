@@ -65,6 +65,8 @@ sudo bash scripts/build-image.sh
 ```
 
 The builder requires a clean Git checkout so its commit identifies its inputs.
+Do not edit the checkout while a build is running: Bash reads scripts as it
+executes them. Make changes only after the build exits, then commit and restart.
 It serializes builds within the checkout using `flock`. Work lives in
 `build/run.*`; the verified compressed base is cached under `build/cache/`.
 Each attempt has a unique directory under `dist/` containing its logs. Success
