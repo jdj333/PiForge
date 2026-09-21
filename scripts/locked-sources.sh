@@ -24,7 +24,9 @@ gitPullOrClone() {
     git config --global --add safe.directory "$cache" || exit 1
     "${git_command[@]}" -c protocol.file.allow=always fetch --depth=1 --update-shallow "$cache" "$commit" || exit 1
     "${git_command[@]}" checkout --detach --force "$commit" || exit 1
-    "${git_command[@]}" -c protocol.file.allow=never submodule update --init --recursive --depth=1 || exit 1
+    if [[ -f $dir/.gitmodules ]]; then
+        "${git_command[@]}" -c protocol.file.allow=never submodule update --init --recursive --depth=1 || exit 1
+    fi
     actual=$("${git_command[@]}" rev-parse HEAD) || exit 1
     [[ $actual == "$commit" ]] || exit 1
     python3 "${PIFORGE_ROOT:-/opt/piforge}/scripts/record-source.py" "$repo" "$dir" "$commit" || exit 1

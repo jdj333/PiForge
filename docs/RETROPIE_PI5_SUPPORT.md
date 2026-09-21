@@ -117,3 +117,9 @@ still move; a removed version stops the build, and durable historical rebuilds
 need an immutable package archive. This is not a bit-for-bit image
 reproducibility claim. No QEMU or chroot
 test establishes physical Pi 5 boot, GPU, audio, or controller compatibility.
+
+The pinned Mupen64Plus-Next source contains a gitlink at
+`mupen64plus-rsp-paraLLEl/lightning/gnulib` without a `.gitmodules`
+declaration. PiForge follows declared submodules only and records all gitlinks
+in source metadata. It does not invent a remote for that unused entry; the
+upstream Pi 5 recipe does not enable ParaLLEl RSP. No emulator patch is needed.

@@ -29,6 +29,12 @@ class SourceAdapterTests(unittest.TestCase):
         self.run_git("-C", str(repo), "add", "payload.txt")
         self.run_git("-C", str(repo), "-c", "user.name=Test", "-c", "user.email=test@example.invalid",
                      "commit", "-qm", "fixture")
+        self.first_commit = self.run_git("-C", str(repo), "rev-parse", "HEAD").strip()
+        # Match upstream's unused gitlink without a .gitmodules declaration.
+        self.run_git("-C", str(repo), "update-index", "--add", "--cacheinfo",
+                     f"160000,{self.first_commit},unused/dependency")
+        self.run_git("-C", str(repo), "-c", "user.name=Test", "-c", "user.email=test@example.invalid",
+                     "commit", "-qm", "unused gitlink")
         self.commit = self.run_git("-C", str(repo), "rev-parse", "HEAD").strip()
         cache = self.root / "cache" / (self.commit + ".git")
         cache.parent.mkdir()
@@ -54,6 +60,8 @@ class SourceAdapterTests(unittest.TestCase):
         self.assertEqual(self.run_git("-C", str(self.root / "checkout"), "rev-parse", "HEAD").strip(), self.commit)
         record = json.loads((self.root / "logs/sources.jsonl").read_text())
         self.assertEqual(record["commit"], self.commit)
+        self.assertEqual(record["submodules"], [])
+        self.assertEqual(record["gitlinks"], [f"160000 commit {self.first_commit}\tunused/dependency"])
 
     def test_rejects_unlocked_repository_before_checkout(self):
         result = self.invoke("https://github.com/unreviewed/repo.git")
