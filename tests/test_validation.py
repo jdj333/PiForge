@@ -150,7 +150,21 @@ class FilesystemTests(unittest.TestCase):
         palette = self.root / "original.pal"
         palette.write_text("[General]\nBackground0=0\n")
         (base / "BIOS/palettes/default.pal").write_bytes(palette.read_bytes())
+        (base / "roms/megadrive").mkdir()
+        alias = base / "roms/genesis"
+        alias.symlink_to("megadrive")
         check_content(self.root, palette)
+        alias.unlink()
+        alias.symlink_to("nes")
+        with self.assertRaises(ValueError):
+            check_content(self.root, palette)
+        alias.unlink()
+        alias.symlink_to("megadrive")
+        sega_game = base / "roms/megadrive/game.bin"
+        sega_game.write_text("test fixture, not a ROM")
+        with self.assertRaises(ValueError):
+            check_content(self.root, palette)
+        sega_game.unlink()
         game = base / "roms/nes/game.nes"
         game.write_text("test fixture, not a ROM")
         with self.assertRaises(ValueError):

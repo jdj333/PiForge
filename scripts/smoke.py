@@ -53,6 +53,11 @@ def check_content(root, palette_source):
     for directory in (base / "roms", base / "BIOS"):
         require(directory.is_dir() and not directory.is_symlink(), f"Missing/unsafe {directory}")
         for path in directory.rglob("*"):
+            if path == base / "roms/genesis" and path.is_symlink():
+                target = base / "roms/megadrive"
+                require(os.readlink(path) == "megadrive" and target.is_dir()
+                        and not target.is_symlink(), "Unexpected Genesis directory alias")
+                continue
             require(not path.is_symlink(), f"Unexpected content symlink: {path}")
             if path.is_dir():
                 continue
