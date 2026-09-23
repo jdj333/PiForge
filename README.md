@@ -16,9 +16,10 @@ The source and base-image pins are in `configs/`. Each component is built and
 checked separately. Output includes `.img.xz`, SHA256 checksums, JSON provenance
 (also `/etc/piforge-build-info.json` inside the image), and build logs.
 
-**Status:** initial implementation; a successful GitHub Actions image build
-and physical Pi 5 validation are still required. Source inspection, static
-tests, and Linux filesystem tests are not proof of hardware compatibility.
+**Status:** a complete local ARM64 Linux build with source and package locks
+has passed, including all requested emulators. A successful GitHub Actions
+image build and physical Pi 5 validation are still required. See
+[validation commands and results](docs/VALIDATION_TESTS.md).
 The base, Git sources and distribution package versions are locked. A build
 fails if those package versions are unavailable or its package inventory
 drifts. Timestamps and filesystem layout still prevent a bit-for-bit guarantee;
@@ -71,5 +72,6 @@ release or a Raspberry Pi compatibility certification.
 * [Upstream Pi 5 support and source evidence](docs/RETROPIE_PI5_SUPPORT.md)
 * [Build architecture and reproducibility limits](docs/ARCHITECTURE.md)
 * [Local and CI builds](docs/BUILDING.md)
+* [Fast checks and full validation commands](docs/VALIDATION_TESTS.md)
 * [Hardware validation](docs/HARDWARE_TESTING.md)
 * [Troubleshooting](docs/TROUBLESHOOTING.md)
