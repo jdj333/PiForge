@@ -123,6 +123,8 @@ devices and mounts before deleting an interrupted work directory.
 PR validation runs shell lint, configuration/unit/static checks, and privileged
 synthetic filesystem tests. The manually dispatched image workflow runs all
 configured components and uploads image/checksum/metadata on success, with logs
-on success or failure. It has no release token, publishing step, or automatic
+on success or failure. Before upload, `scripts/verify-artifacts.py` checks the
+completed archive's integrity and locked provenance against the workflow commit.
+It has no release token, publishing step, or automatic
 deployment. A future release job should consume these verified artifacts only
 after package reproducibility and hardware acceptance have been established.

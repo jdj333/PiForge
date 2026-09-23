@@ -8,11 +8,11 @@ requirements and [HARDWARE_TESTING](HARDWARE_TESTING.md) for physical Pi tests.
 
 ## 1. Fast checks — no root or image build
 
-Requires Python 3, Git, Bash, and ShellCheck. On Debian/Ubuntu:
+Requires Python 3.11 or newer, Git, Bash, ShellCheck, and XZ. On Debian/Ubuntu:
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y python3 git bash shellcheck
+sudo apt-get install -y python3 git bash shellcheck xz-utils
 ```
 
 Run the same fast checks used by CI:
@@ -21,7 +21,7 @@ Run the same fast checks used by CI:
 bash scripts/validate.sh
 ```
 
-Expected: valid configuration/source/package locks, 23 passing unit tests,
+Expected: valid configuration/source/package locks, 29 passing unit tests,
 successful ShellCheck and Bash syntax checks, and no whitespace errors.
 These checks work on macOS with the required tools installed too.
 
@@ -32,6 +32,7 @@ python3 scripts/config.py validate
 python3 scripts/packages.py validate
 python3 -m unittest discover -s tests -p 'test_validation.py' -v
 python3 -m unittest discover -s tests -p 'test_sources.py' -v
+python3 -m unittest discover -s tests -p 'test_artifacts.py' -v
 shellcheck -x scripts/*.sh tests/*.sh
 git diff --check
 ```
@@ -107,6 +108,25 @@ directly on the host to save time.
 
 ## 4. Verify an existing artifact — no rebuild
 
+From the checkout root, run the automated verifier with the artifact's exact
+source commit (replace both example arguments):
+
+```bash
+python3 scripts/verify-artifacts.py dist/BUILD_DIRECTORY \
+  --expected-commit FULL_40_CHARACTER_BUILD_COMMIT
+```
+
+It checks both SHA256 entries, the entire XZ stream, ARM64 architecture,
+successful build-time status, all requested emulator pins, and exact package
+inventory. The artifact must match this checkout's configuration and locks;
+use a checkout of its build commit when validating an older recipe. The
+optional `--expected-commit` also binds the result to the intended build's
+PiForge commit. Bootstrap artifacts deliberately fail this verifier.
+The image workflow performs this check automatically before uploading files.
+It checks archive integrity and recorded provenance; it does not mount the
+image, re-run guest smoke tests, or certify physical hardware behavior.
+
+For manual inspection, the equivalent low-level commands follow.
 Use the exact output directory printed by the successful build, not an older
 or partial attempt. Replace the example path below:
 
